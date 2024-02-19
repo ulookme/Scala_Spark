@@ -350,3 +350,11 @@ févr. 19, 2024 11:29:39 AM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint n
 INFOS: Unsupported notification method: $/setTrace
 févr. 19, 2024 11:29:39 AM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
 INFOS: Unsupported notification method: $/setTrace
+2024.02.19 11:31:20 INFO  logging to files /Users/chajjar/Documents/Scala_certficate/.metals/metals.log,/Users/chajjar/Downloads/recfun-2/.metals/metals.log
+2024.02.19 11:31:20 INFO  Shutting down server
+2024.02.19 11:31:20 INFO  shutting down Metals
+2024.02.19 11:31:20 INFO  Shut down connection with build server.
+2024.02.19 11:31:20 INFO  Shut down connection with build server.
+2024.02.19 11:31:20 INFO  Shut down connection with build server.
+2024.02.19 11:31:20 INFO  Shut down connection with build server.
+2024.02.19 11:31:20 INFO  Exiting server
