@@ -30,31 +30,32 @@ object HorizontalBoxBlurRunner:
     println(s"speedup: ${seqtime.value / partime.value}")
 
 /** A simple, trivially parallelizable computation. */
-object HorizontalBoxBlur extends HorizontalBoxBlurInterface:
+object HorizontalBoxBlur {
 
   /** Blurs the rows of the source image `src` into the destination image `dst`,
    *  starting with `from` and ending with `end` (non-inclusive).
    *
    *  Within each row, `blur` traverses the pixels by going from left to right.
    */
-  def blur(src: Img, dst: Img, from: Int, end: Int, radius: Int): Unit =
-    for {
-      y <- from until end
-      x <- 0 until src.width
-    } dst(x, y) = boxBlurKernel(src, x, y, radius)
+  def blur(src: Img, dst: Img, from: Int, end: Int, radius: Int): Unit = {
+    for(y <- from until end){
+      for(x <- 0 until src.width){
+        dst(x,y) = boxBlurKernel(src, x, y, radius)
+      }
+    }
+  }
 
   /** Blurs the rows of the source image in parallel using `numTasks` tasks.
    *
-   *  Parallelization is done by dividing the source image `src` into
+   *  Parallelization is done by stripping the source image `src` into
    *  `numTasks` separate strips, where each strip is composed of some number of
    *  rows.
    */
-  def parBlur(src: Img, dst: Img, numTasks: Int, radius: Int): Unit =
-    val step = math.max(src.height / numTasks, 1)
-    val tasks = for {
-      start <- 0 until src.height by step
-    } yield task {
-      blur(src, dst, start, math.min(start + step, src.height), radius)
-    }
-    tasks.foreach(_.join())
+  def parBlur(src: Img, dst: Img, numTasks: Int, radius: Int): Unit = {
+    val r = 0 to src.height by (src.height/Math.min(numTasks, src.height))
+    val ranges = r zip r.tail
+    val tasks = ranges.map( { case (from, to) => task(blur(src, dst, from, to, radius)) } )
+    tasks foreach (_.join)
+  }
 
+}

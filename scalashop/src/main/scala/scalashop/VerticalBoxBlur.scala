@@ -31,7 +31,7 @@ object VerticalBoxBlurRunner:
 
 
 /** A simple, trivially parallelizable computation. */
-object VerticalBoxBlur extends VerticalBoxBlurInterface:
+object VerticalBoxBlur {
 
   /** Blurs the columns of the source image `src` into the destination image
    *  `dst`, starting with `from` and ending with `end` (non-inclusive).
@@ -39,24 +39,25 @@ object VerticalBoxBlur extends VerticalBoxBlurInterface:
    *  Within each column, `blur` traverses the pixels by going from top to
    *  bottom.
    */
-  def blur(src: Img, dst: Img, from: Int, end: Int, radius: Int): Unit =
-    for {
-      x <- from until end
-      y <- 0 until src.height
-    } dst.update(x, y, boxBlurKernel(src, x, y, radius))
+  def blur(src: Img, dst: Img, from: Int, end: Int, radius: Int): Unit = {
+    for(x <- from until end){
+      for(y <- 0 until src.height){
+        dst(x,y) = boxBlurKernel(src, x, y, radius)
+      }
+    }
+  }
 
   /** Blurs the columns of the source image in parallel using `numTasks` tasks.
    *
-   *  Parallelization is done by dividing the source image `src` into
+   *  Parallelization is done by stripping the source image `src` into
    *  `numTasks` separate strips, where each strip is composed of some number of
    *  columns.
    */
-  def parBlur(src: Img, dst: Img, numTasks: Int, radius: Int): Unit =
-    val colsPerTask = math.max(src.width / numTasks, 1)
-    val tasks = for {
-      startCol <- 0 until src.width by colsPerTask
-    } yield task {
-      blur(src, dst, startCol, math.min(startCol + colsPerTask, src.width), radius)
-    }
-    tasks.foreach(_.join())
+  def parBlur(src: Img, dst: Img, numTasks: Int, radius: Int): Unit = {
+    val r = 0 to src.width by (src.width/Math.min(numTasks, src.width))
+    val ranges = r zip r.tail
+    val tasks = ranges.map( { case (from, to) => task(blur(src, dst, from, to, radius)) } )
+    tasks foreach (_.join)
+  }
 
+}
